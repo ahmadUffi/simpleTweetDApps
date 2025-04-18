@@ -125,6 +125,7 @@ button[type="submit"] {
 .likes {
   display: flex;
   align-items: center;
+  gap: 10px;
 }
 
 .likes-count {

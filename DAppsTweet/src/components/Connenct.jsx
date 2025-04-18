@@ -8,61 +8,17 @@ import abiProfile from "../contracts/user.json";
 
 const Connenct = ({
   setContract,
-  setUserContract,
+  setProfileContract,
   setAccount,
   setWeb3,
   account,
-  checkProfile,
   profileExists,
 }) => {
   const [loading, setLoading] = useState(false);
-  async function switchToSepolia() {
-    try {
-      // Request user to switch to Sepolia
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: "0xaa36a7" }], // Chain ID for Sepolia in hexadecimal
-      });
-    } catch (switchError) {
-      if (switchError.code === 4902) {
-        try {
-          // If Sepolia is not added to user's MetaMask, add it
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainId: "0xaa36a7",
-                chainName: "Sepolia",
-                nativeCurrency: {
-                  name: "ETH",
-                  symbol: "ETH",
-                  decimals: 18,
-                },
-                rpcUrls: ["https://rpc.sepolia.org"],
-              },
-            ],
-          });
-        } catch (addError) {
-          console.error("Failed to add Sepolia network to MetaMask", addError);
-        }
-      } else {
-        console.error("Failed to switch to Sepolia network", switchError);
-      }
-    }
-  }
+
   async function connectWallet() {
     if (window.ethereum) {
       try {
-        await window.ethereum.enable();
-        const networkId = await window.ethereum.request({
-          method: "net_version",
-        });
-
-        if (networkId !== "100") {
-          // Network ID for Sepolia
-          await switchToSepolia();
-        }
-
         // initialize Web3 with the provider from MetaMask
         const web3 = new Web3(window.ethereum);
         await setWeb3(web3);
@@ -83,8 +39,7 @@ const Connenct = ({
           abiProfile,
           contractAddressProfile
         );
-        await setUserContract(contractProfile);
-        checkProfile(accounts[0]);
+        await setProfileContract(contractProfile);
       } catch (error) {
         console.error("Error connecting wallet:", error);
       } finally {
@@ -94,6 +49,12 @@ const Connenct = ({
       alert("Please install MetaMask!");
     }
   }
+  function shortAddress(address) {
+    if (!address) return "";
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  }
+
+  const shorAddress = shortAddress(account);
   return (
     <>
       <div className="connect">
@@ -102,16 +63,19 @@ const Connenct = ({
             Connect Wallet
           </button>
         ) : (
-          <div id="userAddress">Connected: {account}</div>
+          <div id="userAddress">Connected: {shorAddress}</div>
         )}
       </div>
       <div id="connectMessage">
         {!account ? "Please connect your wallet to tweet." : ""}
       </div>
       {!profileExists ? (
-        <h1>Profile does not exist</h1>
+        <h1>Connect your Wallet and Make A profile</h1>
       ) : (
-        <h1>{profileExists}</h1>
+        <>
+          <h1>{profileExists}</h1>
+          <p style={{ textAlign: "center" }}>{profileExists.bio}</p>
+        </>
       )}
     </>
   );

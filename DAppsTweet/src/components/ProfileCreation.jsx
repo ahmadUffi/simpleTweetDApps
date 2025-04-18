@@ -1,19 +1,18 @@
 import React, { useState } from "react";
 
-function ProfileCreation({ userContract, account, checkProfile }) {
+function ProfileCreation({ profileContract, account, checkProfile }) {
   const [username, setUsername] = useState("");
   const [bio, setBio] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(userContract);
     try {
       setLoading(true);
-      await userContract.methods
+      await profileContract.methods
         .setProfile(username, bio)
         .send({ from: account });
-      const profile = await userContract.methods.getProfile(account).call();
+      const profile = await profileContract.methods.getProfile(account).call();
       console.log("Profile created successfully:", profile);
       checkProfile(account);
       alert("Profile created successfully");
